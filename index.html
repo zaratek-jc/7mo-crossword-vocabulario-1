@@ -1,0 +1,2937 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Crucigrama de Vocabulario — Colegio San Ignacio</title>
+
+<style>
+:root {
+    --oxford-blue: #002147;
+    --oxford-dark: #00162f;
+    --white: #ffffff;
+
+    --cell-size: 34px;
+
+    --green: #15803d;
+    --green-bg: #dcfce7;
+
+    --red: #b91c1c;
+    --red-bg: #fee2e2;
+
+    --yellow: #f59e0b;
+    --yellow-bg: #fef3c7;
+
+    --active: #bfdbfe;
+    --word-active: #dbeafe;
+
+    --border: #9ca3af;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #edf2f7;
+    color: #172033;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* =========================================================
+   ENCABEZADO INSTITUCIONAL
+   ========================================================= */
+
+.institutional-header {
+    background: var(--oxford-blue);
+    color: white;
+    text-align: center;
+    padding: 22px 15px;
+}
+
+.institutional-header h1 {
+    margin: 0;
+    font-size: clamp(1.45rem, 4vw, 2.2rem);
+    letter-spacing: 1px;
+}
+
+.institutional-header p {
+    margin: 8px 0 0;
+    font-size: clamp(.9rem, 2.5vw, 1.05rem);
+}
+
+/* =========================================================
+   CONTENEDOR
+   ========================================================= */
+
+.app-container {
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* =========================================================
+   BARRA DE ESTUDIANTE
+   ========================================================= */
+
+.student-bar {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr auto;
+    gap: 15px;
+    align-items: end;
+
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: var(--oxford-blue);
+    font-size: .92rem;
+}
+
+select {
+    width: 100%;
+    padding: 11px 12px;
+
+    border: 1px solid #b7c2ce;
+    border-radius: 7px;
+
+    background: white;
+
+    font-size: .95rem;
+}
+
+.timer-box {
+    min-width: 125px;
+
+    background: var(--oxford-blue);
+    color: white;
+
+    border-radius: 8px;
+
+    text-align: center;
+
+    padding: 9px 15px;
+}
+
+.timer-label {
+    font-size: .72rem;
+    opacity: .85;
+}
+
+#timer {
+    font-size: 1.4rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(600px, 1fr) minmax(340px, .8fr);
+    gap: 22px;
+    align-items: start;
+}
+
+/* =========================================================
+   PANEL DEL CRUCIGRAMA
+   ========================================================= */
+
+.crossword-panel {
+    background: var(--oxford-blue);
+    color: white;
+
+    border-radius: 14px;
+
+    padding: 22px;
+
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+
+    overflow: hidden;
+}
+
+.panel-title {
+    margin: 0 0 15px;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+/* =========================================================
+   CONTENEDOR DE LA CUADRÍCULA
+   ========================================================= */
+
+.crossword-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 12px 6px 18px;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+/*
+   La cuadrícula tiene dimensiones físicas fijas.
+   Cada casilla se posiciona explícitamente mediante
+   left/top. Esto evita que el navegador comprima
+   o recorte las palabras.
+*/
+
+.crossword {
+    position: relative;
+
+    width: calc(23 * var(--cell-size));
+    height: calc(19 * var(--cell-size));
+
+    min-width: calc(23 * var(--cell-size));
+    min-height: calc(19 * var(--cell-size));
+
+    margin: 0 auto;
+}
+
+/* =========================================================
+   CASILLAS
+   ========================================================= */
+
+.cell {
+    position: absolute;
+
+    width: var(--cell-size);
+    height: var(--cell-size);
+
+    margin: 0;
+    padding: 0;
+}
+
+.cell.block {
+    background: transparent;
+}
+
+.cell.active-cell {
+    background: white;
+
+    border: 1px solid var(--border);
+}
+
+.cell input {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    outline: none;
+
+    background: white;
+
+    color: var(--oxford-blue);
+
+    text-align: center;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    line-height: 1;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.cell input:focus {
+    background: #eff6ff;
+}
+
+.cell.word-highlight input {
+    background: var(--word-active);
+}
+
+.cell.active-selected input {
+    background: var(--active);
+
+    box-shadow:
+        inset 0 0 0 3px #2563eb;
+}
+
+.cell.correct input {
+    background: var(--green-bg);
+    color: var(--green);
+}
+
+.cell.incorrect input {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.cell.revealed input {
+    background: var(--yellow-bg);
+    color: #92400e;
+}
+
+.cell-number {
+    position: absolute;
+
+    top: 1px;
+    left: 3px;
+
+    z-index: 5;
+
+    font-size: 9px;
+    line-height: 9px;
+
+    font-weight: bold;
+
+    color: #334155;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   INSTRUCCIONES
+   ========================================================= */
+
+.instructions {
+    margin-top: 8px;
+
+    text-align: center;
+
+    font-size: .82rem;
+
+    opacity: .9;
+
+    line-height: 1.45;
+}
+
+/* =========================================================
+   COLUMNA DERECHA
+   ========================================================= */
+
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.card {
+    background: white;
+
+    border-radius: 12px;
+
+    padding: 18px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.card h2 {
+    color: var(--oxford-blue);
+
+    font-size: 1.1rem;
+
+    margin: 0 0 13px;
+
+    border-bottom: 2px solid #c9dceb;
+
+    padding-bottom: 8px;
+}
+
+/* =========================================================
+   PISTAS
+   ========================================================= */
+
+.clue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.clue {
+    border: 1px solid #d8e0e8;
+
+    border-radius: 7px;
+
+    padding: 9px 10px;
+
+    background: white;
+
+    cursor: pointer;
+
+    line-height: 1.35;
+
+    transition: .15s;
+}
+
+.clue:hover {
+    background: #eaf2f8;
+}
+
+.clue.selected {
+    background: #dbeafe;
+
+    border-color: #60a5fa;
+}
+
+.clue-number {
+    font-weight: bold;
+
+    color: var(--oxford-blue);
+
+    margin-right: 5px;
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.actions {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 9px;
+}
+
+button {
+    border: 0;
+
+    border-radius: 7px;
+
+    padding: 11px 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    font-size: .9rem;
+
+    transition: .15s;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+.btn-primary {
+    background: var(--oxford-blue);
+    color: white;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #172033;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: #172033;
+}
+
+.btn-success {
+    background: var(--green);
+    color: white;
+}
+
+/* =========================================================
+   ESTADOS
+   ========================================================= */
+
+.status {
+    border-radius: 8px;
+
+    padding: 11px;
+
+    font-size: .88rem;
+
+    line-height: 1.4;
+
+    background: #f1f5f9;
+
+    color: #334155;
+}
+
+.status.success {
+    background: var(--green-bg);
+    color: #166534;
+}
+
+.status.error {
+    background: var(--red-bg);
+    color: #991b1b;
+}
+
+.status.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.completion {
+    display: none;
+
+    background: var(--green-bg);
+
+    color: #166534;
+
+    border: 1px solid #86efac;
+
+    border-radius: 8px;
+
+    padding: 12px;
+
+    font-weight: bold;
+
+    line-height: 1.45;
+}
+
+.completion.visible {
+    display: block;
+}
+
+.report-note {
+    margin-top: 7px;
+
+    font-size: .78rem;
+
+    color: #64748b;
+
+    line-height: 1.35;
+}
+
+.footer {
+    text-align: center;
+
+    padding: 20px;
+
+    color: #64748b;
+
+    font-size: .8rem;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .student-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .timer-box {
+        grid-column: span 2;
+
+        justify-self: center;
+    }
+}
+
+@media (max-width: 700px) {
+
+    :root {
+        --cell-size: 30px;
+    }
+
+    .app-container {
+        padding: 10px;
+    }
+
+    .student-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .timer-box {
+        grid-column: auto;
+
+        width: 100%;
+    }
+
+    .crossword-panel {
+        padding: 10px;
+    }
+
+    .crossword {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .actions {
+        grid-template-columns: 1fr;
+    }
+
+    .cell input {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 420px) {
+
+    :root {
+        --cell-size: 28px;
+    }
+
+    .cell input {
+        font-size: 15px;
+    }
+
+    .cell-number {
+        font-size: 7px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="institutional-header">
+
+    <h1>COLEGIO SAN IGNACIO</h1>
+
+    <p>
+        Departamento de Lenguaje — Crucigrama de Vocabulario
+    </p>
+
+</header>
+
+
+<div class="app-container">
+
+    <!-- =====================================================
+         ESTUDIANTE
+         ===================================================== -->
+
+    <div class="student-bar">
+
+        <div class="form-group">
+
+            <label for="grade-select">
+                Curso / Grade:
+            </label>
+
+            <select id="grade-select">
+
+                <option value="">
+                    -- Seleccionar Curso --
+                </option>
+
+                <option value="7th grade A">
+                    7th grade A
+                </option>
+
+                <option value="7th grade B">
+                    7th grade B
+                </option>
+
+                <option value="7th grade C">
+                    7th grade C
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="student-select">
+                Nombre del estudiante:
+            </label>
+
+            <select
+                id="student-select"
+                disabled
+            >
+
+                <option value="">
+                    -- Seleccionar nombre --
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="timer-box">
+
+            <div class="timer-label">
+                TIEMPO
+            </div>
+
+            <div id="timer">
+                00:00
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+         ===================================================== -->
+
+    <div class="layout">
+
+
+        <!-- =================================================
+             CRUCIGRAMA
+             ================================================= -->
+
+        <section class="crossword-panel">
+
+            <h2 class="panel-title">
+                Crucigrama de vocabulario
+            </h2>
+
+
+            <div class="crossword-wrapper">
+
+                <div
+                    id="crossword"
+                    class="crossword"
+                ></div>
+
+            </div>
+
+
+            <div class="instructions">
+
+                Haz clic en una casilla para seleccionar
+                una palabra.
+
+                En una intersección, vuelve a hacer clic
+                para cambiar entre horizontal y vertical.
+
+                Usa las flechas del teclado para desplazarte.
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PISTAS Y CONTROLES
+             ================================================= -->
+
+        <aside class="right-column">
+
+
+            <section class="card">
+
+                <h2>
+                    Horizontales
+                </h2>
+
+                <div
+                    id="across-clues"
+                    class="clue-list"
+                ></div>
+
+            </section>
+
+
+            <section class="card">
+
+                <h2>
+                    Verticales
+                </h2>
+
+                <div
+                    id="down-clues"
+                    class="clue-list"
+                ></div>
+
+            </section>
+
+
+            <section class="card">
+
+                <h2>
+                    Controles
+                </h2>
+
+
+                <div class="actions">
+
+                    <button
+                        id="check-btn"
+                        class="btn-primary"
+                    >
+                        Comprobar
+                    </button>
+
+
+                    <button
+                        id="reveal-btn"
+                        class="btn-warning"
+                    >
+                        Revelar solución
+                    </button>
+
+
+                    <button
+                        id="reset-btn"
+                        class="btn-secondary"
+                    >
+                        Reiniciar
+                    </button>
+
+
+                    <button
+                        id="report-btn"
+                        class="btn-success"
+                        disabled
+                    >
+                        Descargar informe
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="status"
+                    class="status"
+                    style="margin-top:12px;"
+                >
+                    Selecciona curso y estudiante
+                    para comenzar.
+                </div>
+
+
+                <div
+                    id="completion"
+                    class="completion"
+                    style="margin-top:12px;"
+                >
+                    ¡Crucigrama completado correctamente!
+
+                    El informe está disponible para descargar.
+                </div>
+
+
+                <div class="report-note">
+
+                    El informe contiene únicamente los datos
+                    de realización, resultado y tiempo.
+
+                    No incluye una guía de estudio ni
+                    las soluciones.
+
+                </div>
+
+            </section>
+
+        </aside>
+
+    </div>
+
+
+    <div class="footer">
+        Colegio San Ignacio · Departamento de Lenguaje
+    </div>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   PALABRAS Y PISTAS
+   ============================================================ */
+
+const crosswordWords = [
+
+    {
+        number: 1,
+        word: "BROCA",
+        clue: "Herramienta metálica para hacer agujeros en materiales duros.",
+        row: 0,
+        col: 4,
+        direction: "down"
+    },
+
+    {
+        number: 2,
+        word: "BRASERO",
+        clue: "Recipiente metálico para contener brasas que calientan la estancia.",
+        row: 2,
+        col: 6,
+        direction: "down"
+    },
+
+    {
+        number: 3,
+        word: "CALZADA",
+        clue: "Parte de la calle o camino pavimentado por donde circulan vehículos.",
+        row: 4,
+        col: 0,
+        direction: "across"
+    },
+
+    {
+        number: 4,
+        word: "PALMATORIA",
+        clue: "Utensilio pequeño para sostener una vela.",
+        row: 5,
+        col: 8,
+        direction: "down"
+    },
+
+    {
+        number: 5,
+        word: "GOLILLA",
+        clue: "Pieza de metal redonda que ajusta los tornillos o tuercas.",
+        row: 5,
+        col: 11,
+        direction: "down"
+    },
+
+    {
+        number: 6,
+        word: "ESPERANTO",
+        clue: "Idioma artificial creado para facilitar la comunicación mundial.",
+        row: 6,
+        col: 3,
+        direction: "across"
+    },
+
+    {
+        number: 7,
+        word: "MENDRUGO",
+        clue: "Pedazo de pan duro o desechado.",
+        row: 7,
+        col: 16,
+        direction: "down"
+    },
+
+    {
+        number: 8,
+        word: "DEVOTO",
+        clue: "Persona dedicada con fervor a una religión o causa.",
+        row: 8,
+        col: 1,
+        direction: "across"
+    },
+
+    {
+        number: 9,
+        word: "DESVAN",
+        displayWord: "DESVÁN",
+        clue: "Parte más alta de una casa donde se guardan objetos viejos.",
+        row: 8,
+        col: 15,
+        direction: "across"
+    },
+
+    {
+        number: 10,
+        word: "VAHIDO",
+        displayWord: "VAHÍDO",
+        clue: "Desvanecimiento o mareo breve y pasajero.",
+        row: 8,
+        col: 18,
+        direction: "down"
+    },
+
+    {
+        number: 11,
+        word: "ACHAQUE",
+        clue: "Indisposición o molestia de salud habitual o por la edad.",
+        row: 10,
+        col: 2,
+        direction: "down"
+    },
+
+    {
+        number: 12,
+        word: "GRESCA",
+        clue: "Reñida riña, pelea o altercado entre varias personas.",
+        row: 10,
+        col: 4,
+        direction: "down"
+    },
+
+    {
+        number: 13,
+        word: "TRAGALUZ",
+        clue: "Ventana en el techo o pared alta para dar luz a una habitación.",
+        row: 10,
+        col: 14,
+        direction: "down"
+    },
+
+    {
+        number: 14,
+        word: "CUCURUCHO",
+        displayWord: "CUCURUCHO",
+        clue: "Papel o cartón enrollado en forma de cono.",
+        row: 11,
+        col: 0,
+        direction: "across"
+    },
+
+    {
+        number: 15,
+        word: "PATRANA",
+        displayWord: "PATRAÑA",
+        clue: "Mentira, mentira inventada o relato engañoso.",
+        row: 12,
+        col: 10,
+        direction: "down"
+    },
+
+    {
+        number: 16,
+        word: "DEDAL",
+        clue: "Utensilio cónico para proteger el dedo al coser.",
+        row: 12,
+        col: 18,
+        direction: "across"
+    },
+
+    {
+        number: 17,
+        word: "ALTERCADO",
+        clue: "Discusión acalorada y violenta entre dos o más personas.",
+        row: 14,
+        col: 8,
+        direction: "across"
+    }
+
+];
+
+
+/* ============================================================
+   DIMENSIONES
+   ============================================================ */
+
+const GRID_ROWS = 19;
+const GRID_COLS = 23;
+
+
+/* ============================================================
+   LISTA DE ESTUDIANTES
+   ============================================================ */
+
+const students = {
+
+    "7th grade A": [
+
+        "Abarca Nuñez Florencia Ayelén",
+        "Alfaro Cuevas Agustina Paz",
+        "Argote Luza Amanda Leonor",
+        "Arias Alegría Gustavo León",
+        "Barrera León Antonia Paz",
+        "Barriga Fernández Alex Eduardo",
+        "Castillo Herrera Javier David",
+        "Castro Mincone Emilia Alessandra",
+        "Celis Canales Santiago",
+        "Cortés Cabello Clemente Nicolás",
+        "Del Río Fernández Santiago Isaac",
+        "Fuentes Ramírez Alejandro Ignacio",
+        "González Arriagada Joaquín Alonso",
+        "González Yáñez Lorenzo Tomás",
+        "Guerrero Bustamante Vicente",
+        "Hinojosa Carrasco Victoria Antonia",
+        "Hiplan Godoy Rafaella Francisca",
+        "Iglesias Guerrero Maite Agustina",
+        "Jiménez Monsalves Laura Elena",
+        "Méndez Fernández Violeta Millaray",
+        "Montenegro Uribarri Agustina Paz",
+        "Muñoz Espinoza Mariano Emilio",
+        "Neira Orellana Nicolás Andrés",
+        "Norambuena Garcés Matías Clemente",
+        "Núñez Zamora Florencia Antonia",
+        "Pérez Escobar Emilia Andrea",
+        "Ramírez Cartagena Mateo Ignacio",
+        "Ramírez Oliva Amaro Andrés",
+        "Reffer Horvath Ignacio Javier",
+        "Retamal Leiva Maximiliano Antonio",
+        "Reyes Bravo María Vicenta",
+        "Reyes Urrea Alicia Cristina",
+        "Sánchez Ramírez Cristobal Guillermo",
+        "Veizaga Ruiz Darío Alonso",
+        "Véliz Cortés Josefina Viviana"
+
+    ],
+
+
+    "7th grade B": [
+
+        "Álvarez de Araya Almarza Bruno Ignacio",
+        "Araya Espinoza Bárbara Yudich",
+        "Araya Seguel Javier Ignacio",
+        "Arias Alegría Felipe Roberto",
+        "Arriaza Marsh Paz Emilia",
+        "Barbaste Escalante Emma Leonor",
+        "Barrera Jaque Trinidad Ignacia",
+        "Calderón Palma José Agustín",
+        "Campusano Pérez Francisca Almudena",
+        "Castro Jara Matías Ignacio",
+        "Contreras Arriagada Juan Pablo",
+        "Cortés Díaz Joaquín Alonso",
+        "Díaz Cortés Gaspar Ignacio",
+        "Espinoza Cornejo Fernanda Isidora",
+        "Figueroa Cárdenas Rafaela Sofía",
+        "Figueroa Salazar Cristóbal Javier",
+        "Hernández Leiva Emiliana Catalina",
+        "Lasserre Rodriguez Clara Belén",
+        "Maira Péndola Facundo Alfonso",
+        "Martini Sutherland Isabella Francesca Rosetta",
+        "Moraga Martínez Fernanda Paz",
+        "Neyra Anabalón Vicente Alonso",
+        "Olea Leiva Elisa Magdalena",
+        "Olivares Sánchez Pablo Ignacio",
+        "Orellana García Cristóbal Felipe",
+        "Oviedo Obreque Camila Antonia",
+        "Pacheco Palma Matías Ignacio",
+        "Palma Péndola Gonzalo Alonzo",
+        "Pérez Madariaga Nicolás Maximiliano",
+        "Reyes Briones Lucas Javier",
+        "Saldivia San Martín Emilio Alberto",
+        "Urrutia González Amanda Florencia",
+        "Valdenegro Román Cristóbal Tomás",
+        "Valdés Vergara Gastón Emilio",
+        "Valverde Véliz Santiago Alonso",
+        "Vásquez Reyes María José Valentina",
+        "Wood Corrales Andrew Benjamín Buchanan"
+
+    ],
+
+
+    "7th grade C": [
+
+        "Acevedo Gutiérrez Agustín Emilio",
+        "Aliaga Pennanen José Tomás Antonio",
+        "Arévalo Jara Carla Ignacia",
+        "Arrieta Angulo Felipe Esteban",
+        "Blanco Contreras María Isidora",
+        "Burgos Salazar Agustín Tomás",
+        "Cano Morgado Rafael Elías",
+        "Chávez González Elisa Isabella",
+        "Contreras Ramos Helena Paz",
+        "Dehnhardt Berríos Tomás Leon",
+        "Dinamarca Aránguiz Rebeca Elena",
+        "Flores Ravera Amalia Lourdes",
+        "Lema Carrasco María Jesús",
+        "Loaiza Vistoso María Isabel",
+        "Mallea Aldunate Constanza Paz",
+        "Marrujo Pardo Gisselle Andrea",
+        "Montenegro Vargas Kiara",
+        "Núñez Henríquez Guadalupe Ignacia",
+        "Núñez Zapata Olivia Paz",
+        "Ogaz Klauser Rosario Paz",
+        "Orellana Beltrán Felipe Andrés",
+        "Pinto Decencier Maximiliano Alonso",
+        "Ponce Del Canto María Laura",
+        "Ponce Quintanilla Laura Victoria",
+        "Quezada Ibarra Eduardo Gabriel",
+        "Reyes Alarcón Aimee Sarahi",
+        "Román Burgos Monserrat Catalina",
+        "Ruz Reyes Tomás Benjamín",
+        "Sánchez Rodríguez Facundo León",
+        "Squella Troncoso Agustín Enrique",
+        "Suazo Miranda Clemente León",
+        "Ulloa Vega Emilia Ignacia",
+        "Vega Paz Catalina Renata",
+        "Vergara Rojas Mariana Almendra Lucía",
+        "Vines Zúñiga Edmundo André",
+        "Yaksic Rivera Savka Milena",
+        "Yáñez Saavedra Francisca Isidora"
+
+    ]
+
+};
+
+
+/* ============================================================
+   NORMALIZACIÓN
+   ============================================================ */
+
+function normalizeWord(text) {
+
+    return String(text || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase()
+        .replace(/Ñ/g, "N")
+        .replace(/[^A-Z]/g, "");
+
+}
+
+
+/* ============================================================
+   COORDENADAS
+   ============================================================ */
+
+function getCoordinates(word) {
+
+    const clean =
+        normalizeWord(word.word);
+
+    const coordinates = [];
+
+    for (
+        let i = 0;
+        i < clean.length;
+        i++
+    ) {
+
+        const row =
+            word.direction === "down"
+                ? word.row + i
+                : word.row;
+
+        const col =
+            word.direction === "across"
+                ? word.col + i
+                : word.col;
+
+        coordinates.push({
+            row: row,
+            col: col,
+            letter: clean[i]
+        });
+
+    }
+
+    return coordinates;
+}
+
+
+/* ============================================================
+   VALIDACIÓN DE PALABRAS
+   ============================================================ */
+
+function validateWords() {
+
+    const occupied = new Map();
+
+    crosswordWords.forEach(word => {
+
+        const clean =
+            normalizeWord(word.word);
+
+        if (
+            word.number === 3 &&
+            clean.length !== 7
+        ) {
+
+            throw new Error(
+                "CALZADA debe tener exactamente 7 letras."
+            );
+
+        }
+
+        if (
+            word.number === 14 &&
+            clean.length !== 9
+        ) {
+
+            throw new Error(
+                "CUCURUCHO debe tener exactamente 9 letras."
+            );
+
+        }
+
+
+        getCoordinates(word).forEach(coord => {
+
+            if (
+                coord.row < 0 ||
+                coord.row >= GRID_ROWS ||
+                coord.col < 0 ||
+                coord.col >= GRID_COLS
+            ) {
+
+                throw new Error(
+                    `La palabra ${word.word} sale de la cuadrícula.`
+                );
+
+            }
+
+
+            const key =
+                `${coord.row}-${coord.col}`;
+
+
+            if (occupied.has(key)) {
+
+                const previous =
+                    occupied.get(key);
+
+                if (
+                    previous.letter !== coord.letter
+                ) {
+
+                    throw new Error(
+                        `Intersección incorrecta en ${key}: ` +
+                        `${previous.letter} / ${coord.letter}`
+                    );
+
+                }
+
+                previous.words.push(
+                    word.number
+                );
+
+            }
+            else {
+
+                occupied.set(
+                    key,
+                    {
+                        letter: coord.letter,
+                        words: [word.number]
+                    }
+                );
+
+            }
+
+        });
+
+    });
+
+    return occupied;
+}
+
+
+const occupied =
+    validateWords();
+
+
+/* ============================================================
+   MAPA DE PALABRAS POR CASILLA
+   ============================================================ */
+
+const cellWords = new Map();
+
+crosswordWords.forEach(word => {
+
+    getCoordinates(word).forEach(coord => {
+
+        const key =
+            `${coord.row}-${coord.col}`;
+
+        if (!cellWords.has(key)) {
+            cellWords.set(key, []);
+        }
+
+        cellWords
+            .get(key)
+            .push(word);
+
+    });
+
+});
+
+
+/* ============================================================
+   ELEMENTOS
+   ============================================================ */
+
+const crossword =
+    document.getElementById("crossword");
+
+const gradeSelect =
+    document.getElementById("grade-select");
+
+const studentSelect =
+    document.getElementById("student-select");
+
+const checkBtn =
+    document.getElementById("check-btn");
+
+const revealBtn =
+    document.getElementById("reveal-btn");
+
+const resetBtn =
+    document.getElementById("reset-btn");
+
+const reportBtn =
+    document.getElementById("report-btn");
+
+const statusBox =
+    document.getElementById("status");
+
+const completionBox =
+    document.getElementById("completion");
+
+const timerElement =
+    document.getElementById("timer");
+
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+
+let selectedWord = null;
+
+let selectedDirection = null;
+
+let selectedCell = null;
+
+let seconds = 0;
+
+let timerInterval = null;
+
+let completed = false;
+
+let solutionRevealed = false;
+
+
+/* ============================================================
+   TAMAÑO DE CELDA
+   ============================================================ */
+
+function getCellSize() {
+
+    return parseFloat(
+        getComputedStyle(
+            document.documentElement
+        )
+        .getPropertyValue(
+            "--cell-size"
+        )
+    );
+
+}
+
+
+/* ============================================================
+   CONSTRUIR CUADRÍCULA
+   ============================================================ */
+
+function buildGrid() {
+
+    crossword.innerHTML = "";
+
+    for (
+        let row = 0;
+        row < GRID_ROWS;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < GRID_COLS;
+            col++
+        ) {
+
+            const cell =
+                document.createElement("div");
+
+            cell.className =
+                "cell block";
+
+            cell.style.left =
+                `${col * getCellSize()}px`;
+
+            cell.style.top =
+                `${row * getCellSize()}px`;
+
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+
+
+            const key =
+                `${row}-${col}`;
+
+
+            if (occupied.has(key)) {
+
+                cell.classList.remove(
+                    "block"
+                );
+
+                cell.classList.add(
+                    "active-cell"
+                );
+
+
+                const input =
+                    document.createElement("input");
+
+                input.type = "text";
+
+                input.maxLength = 1;
+
+                input.autocomplete = "off";
+
+                input.autocorrect = "off";
+
+                input.autocapitalize = "characters";
+
+                input.spellcheck = false;
+
+                input.dataset.row = row;
+
+                input.dataset.col = col;
+
+
+                input.addEventListener(
+                    "click",
+                    handleCellClick
+                );
+
+                input.addEventListener(
+                    "keydown",
+                    handleKeyDown
+                );
+
+                input.addEventListener(
+                    "input",
+                    handleInput
+                );
+
+
+                cell.appendChild(input);
+
+
+                const starts =
+                    crosswordWords.filter(
+                        word =>
+                            word.row === row &&
+                            word.col === col
+                    );
+
+
+                if (starts.length > 0) {
+
+                    const number =
+                        document.createElement("span");
+
+                    number.className =
+                        "cell-number";
+
+                    number.textContent =
+                        Math.min(
+                            ...starts.map(
+                                word =>
+                                    word.number
+                            )
+                        );
+
+                    cell.appendChild(number);
+
+                }
+
+            }
+
+
+            crossword.appendChild(cell);
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   OBTENER INPUT
+   ============================================================ */
+
+function getInput(row, col) {
+
+    return document.querySelector(
+        `.cell input[data-row="${row}"][data-col="${col}"]`
+    );
+
+}
+
+
+/* ============================================================
+   CLICK EN CASILLA
+   ============================================================ */
+
+function handleCellClick(event) {
+
+    const input =
+        event.currentTarget;
+
+    const row =
+        Number(input.dataset.row);
+
+    const col =
+        Number(input.dataset.col);
+
+
+    const words =
+        cellWords.get(
+            `${row}-${col}`
+        ) || [];
+
+
+    if (!words.length) {
+        return;
+    }
+
+
+    let direction =
+        selectedDirection;
+
+
+    if (
+        selectedCell &&
+        selectedCell.row === row &&
+        selectedCell.col === col &&
+        words.length > 1
+    ) {
+
+        direction =
+            direction === "across"
+                ? "down"
+                : "across";
+
+    }
+
+
+    const word =
+        words.find(
+            item =>
+                item.direction === direction
+        ) || words[0];
+
+
+    selectWord(
+        word,
+        row,
+        col
+    );
+
+
+    input.focus();
+
+}
+
+
+/* ============================================================
+   SELECCIONAR PALABRA
+   ============================================================ */
+
+function selectWord(
+    word,
+    row = word.row,
+    col = word.col
+) {
+
+    selectedWord = word;
+
+    selectedDirection =
+        word.direction;
+
+    selectedCell = {
+        row: row,
+        col: col
+    };
+
+
+    clearHighlights();
+
+
+    getCoordinates(word).forEach(
+        coord => {
+
+            const input =
+                getInput(
+                    coord.row,
+                    coord.col
+                );
+
+            if (input) {
+
+                input.parentElement
+                    .classList.add(
+                        "word-highlight"
+                    );
+
+            }
+
+        }
+    );
+
+
+    const active =
+        getInput(
+            row,
+            col
+        );
+
+
+    if (active) {
+
+        active.parentElement
+            .classList.add(
+                "active-selected"
+            );
+
+    }
+
+
+    const clue =
+        document.querySelector(
+            `.clue[data-number="${word.number}"][data-direction="${word.direction}"]`
+        );
+
+
+    if (clue) {
+        clue.classList.add("selected");
+    }
+
+}
+
+
+/* ============================================================
+   LIMPIAR SELECCIÓN
+   ============================================================ */
+
+function clearHighlights() {
+
+    document
+        .querySelectorAll(
+            ".word-highlight"
+        )
+        .forEach(
+            element =>
+                element.classList.remove(
+                    "word-highlight"
+                )
+        );
+
+
+    document
+        .querySelectorAll(
+            ".active-selected"
+        )
+        .forEach(
+            element =>
+                element.classList.remove(
+                    "active-selected"
+                )
+        );
+
+
+    document
+        .querySelectorAll(
+            ".clue.selected"
+        )
+        .forEach(
+            element =>
+                element.classList.remove(
+                    "selected"
+                )
+        );
+
+}
+
+
+/* ============================================================
+   TECLADO
+   ============================================================ */
+
+function handleKeyDown(event) {
+
+    const input =
+        event.currentTarget;
+
+    const row =
+        Number(input.dataset.row);
+
+    const col =
+        Number(input.dataset.col);
+
+
+    if (event.key === "ArrowRight") {
+
+        event.preventDefault();
+
+        moveTo(row, col + 1);
+
+        return;
+    }
+
+
+    if (event.key === "ArrowLeft") {
+
+        event.preventDefault();
+
+        moveTo(row, col - 1);
+
+        return;
+    }
+
+
+    if (event.key === "ArrowDown") {
+
+        event.preventDefault();
+
+        moveTo(row + 1, col);
+
+        return;
+    }
+
+
+    if (event.key === "ArrowUp") {
+
+        event.preventDefault();
+
+        moveTo(row - 1, col);
+
+        return;
+    }
+
+
+    if (
+        event.key === "Backspace" &&
+        !input.value
+    ) {
+
+        const previous =
+            selectedDirection === "across"
+                ? getInput(row, col - 1)
+                : getInput(row - 1, col);
+
+
+        if (previous) {
+
+            previous.focus();
+
+            previous.value = "";
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   MOVER
+   ============================================================ */
+
+function moveTo(row, col) {
+
+    if (
+        row < 0 ||
+        row >= GRID_ROWS ||
+        col < 0 ||
+        col >= GRID_COLS
+    ) {
+
+        return;
+
+    }
+
+
+    const input =
+        getInput(row, col);
+
+
+    if (!input) {
+        return;
+    }
+
+
+    if (selectedWord) {
+
+        const belongs =
+            getCoordinates(
+                selectedWord
+            ).some(
+                coord =>
+                    coord.row === row &&
+                    coord.col === col
+            );
+
+
+        if (!belongs) {
+            return;
+        }
+
+    }
+
+
+    input.focus();
+
+
+    if (selectedWord) {
+
+        selectWord(
+            selectedWord,
+            row,
+            col
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   ESCRIBIR LETRA
+   ============================================================ */
+
+function handleInput(event) {
+
+    const input =
+        event.currentTarget;
+
+
+    input.value =
+        normalizeWord(
+            input.value
+        ).charAt(0);
+
+
+    input.parentElement
+        .classList.remove(
+            "correct",
+            "incorrect",
+            "revealed"
+        );
+
+
+    checkCompletionSilently();
+
+
+    if (
+        input.value &&
+        selectedWord
+    ) {
+
+        const row =
+            Number(input.dataset.row);
+
+        const col =
+            Number(input.dataset.col);
+
+
+        const nextRow =
+            selectedDirection === "down"
+                ? row + 1
+                : row;
+
+
+        const nextCol =
+            selectedDirection === "across"
+                ? col + 1
+                : col;
+
+
+        const next =
+            getInput(
+                nextRow,
+                nextCol
+            );
+
+
+        if (next) {
+
+            const belongs =
+                getCoordinates(
+                    selectedWord
+                ).some(
+                    coord =>
+                        coord.row === nextRow &&
+                        coord.col === nextCol
+                );
+
+
+            if (belongs) {
+                next.focus();
+            }
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   CONSTRUIR PISTAS
+   ============================================================ */
+
+function buildClues() {
+
+    const across =
+        document.getElementById(
+            "across-clues"
+        );
+
+    const down =
+        document.getElementById(
+            "down-clues"
+        );
+
+
+    across.innerHTML = "";
+
+    down.innerHTML = "";
+
+
+    crosswordWords
+        .filter(
+            word =>
+                word.direction === "across"
+        )
+        .sort(
+            (a,b) =>
+                a.number - b.number
+        )
+        .forEach(
+            word =>
+                addClue(
+                    across,
+                    word
+                )
+        );
+
+
+    crosswordWords
+        .filter(
+            word =>
+                word.direction === "down"
+        )
+        .sort(
+            (a,b) =>
+                a.number - b.number
+        )
+        .forEach(
+            word =>
+                addClue(
+                    down,
+                    word
+                )
+        );
+
+}
+
+
+function addClue(
+    container,
+    word
+) {
+
+    const clue =
+        document.createElement("div");
+
+    clue.className =
+        "clue";
+
+    clue.dataset.number =
+        word.number;
+
+    clue.dataset.direction =
+        word.direction;
+
+
+    clue.innerHTML =
+        `<span class="clue-number">${word.number}.</span>${word.clue}`;
+
+
+    clue.addEventListener(
+        "click",
+        () => {
+
+            selectWord(word);
+
+            const input =
+                getInput(
+                    word.row,
+                    word.col
+                );
+
+            if (input) {
+                input.focus();
+            }
+
+        }
+    );
+
+
+    container.appendChild(clue);
+
+}
+
+
+/* ============================================================
+   CURSOS
+   ============================================================ */
+
+gradeSelect.addEventListener(
+    "change",
+    handleGradeChange
+);
+
+
+studentSelect.addEventListener(
+    "change",
+    handleStudentChange
+);
+
+
+function handleGradeChange() {
+
+    const grade =
+        gradeSelect.value;
+
+
+    studentSelect.innerHTML =
+        `<option value="">-- Seleccionar nombre --</option>`;
+
+
+    studentSelect.disabled =
+        !grade;
+
+
+    if (
+        grade &&
+        students[grade]
+    ) {
+
+        students[grade].forEach(
+            student => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    student;
+
+                option.textContent =
+                    student;
+
+                studentSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    resetCrossword(false);
+
+    stopTimer();
+
+
+    statusBox.className =
+        "status";
+
+
+    statusBox.textContent =
+        grade
+            ? "Ahora selecciona el nombre del estudiante."
+            : "Selecciona curso y estudiante para comenzar.";
+
+}
+
+
+/* ============================================================
+   ESTUDIANTE
+   ============================================================ */
+
+function handleStudentChange() {
+
+    resetCrossword(false);
+
+
+    if (studentSelect.value) {
+
+        statusBox.className =
+            "status";
+
+        statusBox.textContent =
+            "Estudiante seleccionado. Completa el crucigrama.";
+
+        startTimer();
+
+    }
+    else {
+
+        stopTimer();
+
+        statusBox.className =
+            "status";
+
+        statusBox.textContent =
+            "Selecciona un estudiante para comenzar.";
+
+    }
+
+
+    updateReportButton();
+
+}
+
+
+/* ============================================================
+   TEMPORIZADOR
+   ============================================================ */
+
+function startTimer() {
+
+    if (timerInterval) {
+        return;
+    }
+
+
+    timerInterval =
+        setInterval(
+            () => {
+
+                seconds++;
+
+                updateTimer();
+
+            },
+            1000
+        );
+
+}
+
+
+function stopTimer() {
+
+    if (timerInterval) {
+
+        clearInterval(
+            timerInterval
+        );
+
+        timerInterval = null;
+
+    }
+
+}
+
+
+function updateTimer() {
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        )
+        .toString()
+        .padStart(2, "0");
+
+
+    const secs =
+        (seconds % 60)
+        .toString()
+        .padStart(2, "0");
+
+
+    timerElement.textContent =
+        `${minutes}:${secs}`;
+
+}
+
+
+/* ============================================================
+   COMPROBAR
+   ============================================================ */
+
+checkBtn.addEventListener(
+    "click",
+    checkAnswers
+);
+
+
+function checkAnswers() {
+
+    if (solutionRevealed) {
+
+        statusBox.className =
+            "status warning";
+
+        statusBox.textContent =
+            "Se utilizó «Revelar solución». " +
+            "Puedes revisar las respuestas, pero el informe está deshabilitado.";
+
+        updateReportButton();
+
+        return;
+
+    }
+
+
+    let incorrect = 0;
+    let empty = 0;
+
+
+    const processed =
+        new Set();
+
+
+    crosswordWords.forEach(
+        word => {
+
+            getCoordinates(word)
+                .forEach(
+                    coord => {
+
+                        const key =
+                            `${coord.row}-${coord.col}`;
+
+
+                        if (
+                            processed.has(key)
+                        ) {
+                            return;
+                        }
+
+
+                        processed.add(key);
+
+
+                        const input =
+                            getInput(
+                                coord.row,
+                                coord.col
+                            );
+
+
+                        if (!input) {
+                            return;
+                        }
+
+
+                        const expected =
+                            occupied.get(
+                                key
+                            ).letter;
+
+
+                        const actual =
+                            normalizeWord(
+                                input.value
+                            );
+
+
+                        input.parentElement
+                            .classList.remove(
+                                "correct",
+                                "incorrect",
+                                "revealed"
+                            );
+
+
+                        if (!actual) {
+
+                            empty++;
+
+                        }
+                        else if (
+                            actual === expected
+                        ) {
+
+                            input.parentElement
+                                .classList.add(
+                                    "correct"
+                                );
+
+                        }
+                        else {
+
+                            incorrect++;
+
+                            input.parentElement
+                                .classList.add(
+                                    "incorrect"
+                                );
+
+                        }
+
+                    }
+                );
+
+        }
+    );
+
+
+    if (empty > 0) {
+
+        statusBox.className =
+            "status warning";
+
+        statusBox.textContent =
+            `Hay ${empty} casilla(s) sin completar. ` +
+            `${incorrect} incorrecta(s).`;
+
+    }
+    else if (incorrect > 0) {
+
+        statusBox.className =
+            "status error";
+
+        statusBox.textContent =
+            `Hay ${incorrect} casilla(s) incorrecta(s).`;
+
+    }
+    else {
+
+        statusBox.className =
+            "status success";
+
+        statusBox.textContent =
+            "Todas las respuestas son correctas.";
+
+    }
+
+
+    checkCompletionSilently();
+
+}
+
+
+/* ============================================================
+   COMPROBAR COMPLETITUD
+   ============================================================ */
+
+function checkCompletionSilently() {
+
+    if (
+        !gradeSelect.value ||
+        !studentSelect.value ||
+        solutionRevealed
+    ) {
+
+        completed = false;
+
+        updateReportButton();
+
+        return;
+
+    }
+
+
+    let complete = true;
+
+
+    occupied.forEach(
+        (info,key) => {
+
+            const [row,col] =
+                key.split("-")
+                    .map(Number);
+
+
+            const input =
+                getInput(
+                    row,
+                    col
+                );
+
+
+            if (!input) {
+
+                complete = false;
+
+                return;
+
+            }
+
+
+            const actual =
+                normalizeWord(
+                    input.value
+                );
+
+
+            if (
+                actual !== info.letter
+            ) {
+
+                complete = false;
+
+            }
+
+        }
+    );
+
+
+    if (complete) {
+
+        if (!completed) {
+
+            completed = true;
+
+            stopTimer();
+
+
+            completionBox
+                .classList.add(
+                    "visible"
+                );
+
+
+            statusBox.className =
+                "status success";
+
+
+            statusBox.textContent =
+                "¡Excelente! Has completado correctamente " +
+                "todo el crucigrama. El informe está disponible.";
+
+        }
+
+    }
+    else {
+
+        completed = false;
+
+        completionBox
+            .classList.remove(
+                "visible"
+            );
+
+    }
+
+
+    updateReportButton();
+
+}
+
+
+/* ============================================================
+   REVELAR SOLUCIÓN
+   ============================================================ */
+
+revealBtn.addEventListener(
+    "click",
+    revealSolution
+);
+
+
+function revealSolution() {
+
+    const confirmed =
+        confirm(
+            "¿Quieres revelar la solución?\n\n" +
+            "El informe quedará deshabilitado."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    solutionRevealed = true;
+
+    completed = false;
+
+
+    occupied.forEach(
+        (info,key) => {
+
+            const [row,col] =
+                key.split("-")
+                    .map(Number);
+
+
+            const input =
+                getInput(
+                    row,
+                    col
+                );
+
+
+            if (!input) {
+                return;
+            }
+
+
+            input.value =
+                info.letter;
+
+
+            input.parentElement
+                .classList.remove(
+                    "correct",
+                    "incorrect"
+                );
+
+
+            input.parentElement
+                .classList.add(
+                    "revealed"
+                );
+
+        }
+    );
+
+
+    stopTimer();
+
+
+    completionBox
+        .classList.remove(
+            "visible"
+        );
+
+
+    statusBox.className =
+        "status warning";
+
+
+    statusBox.textContent =
+        "Se ha revelado la solución. " +
+        "Las respuestas están visibles, pero el informe NO está disponible.";
+
+
+    updateReportButton();
+
+}
+
+
+/* ============================================================
+   REINICIAR
+   ============================================================ */
+
+resetBtn.addEventListener(
+    "click",
+    () => {
+
+        const confirmed =
+            confirm(
+                "¿Quieres reiniciar el crucigrama?"
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        resetCrossword(true);
+
+    }
+);
+
+
+function resetCrossword(
+    restartTimer
+) {
+
+    document
+        .querySelectorAll(
+            ".cell input"
+        )
+        .forEach(
+            input => {
+
+                input.value = "";
+
+                input.parentElement
+                    .classList.remove(
+                        "correct",
+                        "incorrect",
+                        "revealed",
+                        "word-highlight",
+                        "active-selected"
+                    );
+
+            }
+        );
+
+
+    selectedWord = null;
+
+    selectedDirection = null;
+
+    selectedCell = null;
+
+    completed = false;
+
+    solutionRevealed = false;
+
+
+    completionBox
+        .classList.remove(
+            "visible"
+        );
+
+
+    seconds = 0;
+
+    updateTimer();
+
+
+    if (
+        restartTimer &&
+        studentSelect.value
+    ) {
+
+        startTimer();
+
+        statusBox.className =
+            "status";
+
+        statusBox.textContent =
+            "Crucigrama reiniciado.";
+
+    }
+
+
+    updateReportButton();
+
+}
+
+
+/* ============================================================
+   INFORME
+   ============================================================ */
+
+function updateReportButton() {
+
+    reportBtn.disabled =
+        !(
+            gradeSelect.value &&
+            studentSelect.value &&
+            completed === true &&
+            solutionRevealed === false
+        );
+
+}
+
+
+reportBtn.addEventListener(
+    "click",
+    downloadReport
+);
+
+
+function downloadReport() {
+
+    /*
+     * Seguridad adicional:
+     * aunque alguien intente activar el botón desde
+     * las herramientas del navegador, no se genera
+     * el informe si no se cumplen las condiciones.
+     */
+
+    if (
+        !gradeSelect.value ||
+        !studentSelect.value ||
+        !completed ||
+        solutionRevealed
+    ) {
+
+        alert(
+            "El informe solo puede descargarse " +
+            "cuando el estudiante ha completado " +
+            "correctamente el crucigrama sin revelar la solución."
+        );
+
+        return;
+
+    }
+
+
+    const now =
+        new Date();
+
+
+    const date =
+        now.toLocaleDateString(
+            "es-CL"
+        );
+
+
+    const time =
+        now.toLocaleTimeString(
+            "es-CL",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+
+    const report =
+`COLEGIO SAN IGNACIO
+Departamento de Lengua
+Crucigrama de Vocabulario
+========================================
+
+ESTUDIANTE
+${studentSelect.value}
+
+CURSO
+${gradeSelect.value}
+
+FECHA
+${date}
+
+HORA
+${time}
+
+TIEMPO DE REALIZACIÓN
+${timerElement.textContent}
+
+RESULTADO
+COMPLETADO CORRECTAMENTE
+
+PALABRAS
+17 de 17
+
+ESTADO
+Todas las respuestas fueron completadas correctamente.
+
+OBSERVACIÓN
+El crucigrama fue completado correctamente
+sin utilizar la opción "Revelar solución".
+
+Este informe no contiene una guía de estudio
+ni las respuestas del crucigrama.
+`;
+
+
+    const blob =
+        new Blob(
+            [report],
+            {
+                type:
+                    "text/plain;charset=utf-8"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const safeName =
+        studentSelect.value
+            .normalize("NFD")
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+            .replace(
+                /[^A-Za-z0-9]+/g,
+                "_"
+            );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href = url;
+
+    link.download =
+        `Informe_Crucigrama_${safeName}.txt`;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+
+buildGrid();
+
+buildClues();
+
+updateTimer();
+
+updateReportButton();
+
+
+/* ============================================================
+   COMPROBACIONES ESPECÍFICAS
+   ============================================================ */
+
+console.assert(
+    normalizeWord("CALZADA").length === 7,
+    "ERROR: CALZADA debe tener 7 letras."
+);
+
+console.assert(
+    normalizeWord("CUCURUCHO").length === 9,
+    "ERROR: CUCURUCHO debe tener 9 letras."
+);
+
+console.assert(
+    getCoordinates(
+        crosswordWords.find(
+            word => word.number === 3
+        )
+    ).length === 7,
+    "ERROR: CALZADA debe ocupar 7 casillas."
+);
+
+console.assert(
+    getCoordinates(
+        crosswordWords.find(
+            word => word.number === 14
+        )
+    ).length === 9,
+    "ERROR: CUCURUCHO debe ocupar 9 casillas."
+);
+
+</script>
+
+</body>
+</html>
